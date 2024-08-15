@@ -15,7 +15,7 @@
 
 int main()
 {
-std::set<int> set_1;
+    std::set<int> set_1;
 
     // Метод insert() добавляет элемент в множество.
     std::cout << "Method insert()" << std::endl;
