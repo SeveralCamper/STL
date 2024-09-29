@@ -1,5 +1,6 @@
 #include <array>
 #include <iostream>
+#include <algorithm>
 
 // std::array - контейнер библиотеки STL, который является оберткой для статического массива. Т.к. это обертка для статического массива
 // то и ограничения мы имеем такие же как для статического массива. Для инициализации данного контейнера нужно указать его тип и кол-во эл.
@@ -10,6 +11,7 @@
 
 int main()
 {
+	std::array<int, 5> array = {0}; // инициализация по умолчанию.
 	std::array<int, 5> array_1 {1, 2, 3, 4, 5};
 	// Метод at() являеться аналогом оператора [], но имеет важную особенность, в отличии от оператор [] в случае обращения по неверному индексу
 	// не вызывает UB, а выбрасывает исключение, то есть проверяет границы обращения к элементу. Возвращет элемент по индексу.
@@ -19,7 +21,7 @@ int main()
 	{
 		std::cout << array_1.at(5) << std::endl;
 	}
-	catch(const std::exception& e)
+	catch(const std::exception& e) // std::out_of_range
 	{
 		std::cout << "Execption access by index" << std::endl;
 		std::cerr << e.what() << '\n';
@@ -87,6 +89,25 @@ int main()
 		std::cout << el << " ";
 	}
 	std::cout << std::endl;
+
+    int value_to_find = 3;
+
+	// С помощью метода std::find можно найти элемент в std::array за линейное время
+    auto it = std::find(array_1.begin(), array_1.end(), value_to_find);
+    if (it != array_1.end()) {
+        std::cout << "Element found at index: " << std::distance(array_1.begin(), it) << std::endl;
+    } else {
+        std::cout << "Element not found" << std::endl;
+    }
+
+    // С помощью std::binary_search - за логорифмическое. Бинарный поиск требует отсортированного массива
+    bool found = std::binary_search(array_1.begin(), array_1.end(), value_to_find);
+
+    if (found) {
+        std::cout << "Element found" << std::endl;
+    } else {
+        std::cout << "Element not found" << std::endl;
+    }
 
 	return 0;
 }

@@ -1,5 +1,6 @@
 #include <vector>
 #include <iostream>
+#include <algorithm>
 
 // std::vector - это шаблонный класс, предоставляемый стандартной библиотекой C++, который представляет собой динамический массив.
 // Он является частью STL (Standard Template Library) и поддерживает автоматическое управление памятью, изменение размера, доступ по индексу и многое другое.
@@ -93,6 +94,37 @@ int main()
 		std::cout << *it << std::endl;
 	}
 	std::cout << std::endl << std::endl;
+
+    int value_to_find = 3;
+
+	for (int i = 0; i < 5; i++)
+	{
+		vector_1.push_back(i);
+	}
+
+	std::cout << "Vector: ";
+	for (auto& item : vector_1)
+	{
+		std::cout << item << " ";
+	}
+	std::cout << std::endl;
+
+	// С помощью метода std::find можно найти элемент в std::array за линейное время
+    auto it = std::find(vector_1.begin(), vector_1.end(), value_to_find);
+    if (it != vector_1.end()) {
+        std::cout << "Element found at index: " << std::distance(vector_1.begin(), it) << std::endl;
+    } else {
+        std::cout << "Element not found" << std::endl;
+    }
+
+    // С помощью std::binary_search - за логорифмическое. Бинарный поиск требует отсортированного массива
+    bool found = std::binary_search(vector_1.begin(), vector_1.end(), value_to_find);
+
+    if (found) {
+        std::cout << "Element found" << std::endl;
+    } else {
+        std::cout << "Element not found" << std::endl;
+    }
 
 	return 0;
 }
