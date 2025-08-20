@@ -1,6 +1,7 @@
 #include <list>
 #include <iostream>
 #include <algorithm>
+#include <forward_list>
 
 // std::list - это контейнер, который реализует двусвязный список. Он обеспечивает эффективные вставки и удаления элементов в произвольных позициях,
 // но доступ по индексу к элементам и поиск элемента менее эффективны по сравнению с массивами и векторами.
@@ -33,67 +34,70 @@ int main()
 	}
 	std::cout << std::endl << std::endl;
 
- 	// Метод push_front() добавляет value в начало.
+	// Метод push_front() добавляет value в начало.
 	std::cout << "Method push_front()" << std::endl;
-    list_1.push_front(0);
+	list_1.push_front(0);
 	for(auto& it : list_1)
 	{
 		std::cout << it << std::endl;
 	}
 	std::cout << std::endl << std::endl;
 
-    // Метод insert() добавляет value перед элементом, на который указывает итератор pos().
+	// Метод insert() добавляет value перед элементом, на который указывает итератор pos().
 	std::cout << "Method insert()" << std::endl;
-    auto it = std::next(list_1.begin(), 2);
-    list_1.insert(it, 2);
+	auto it = std::next(list_1.begin(), 2);
+	list_1.insert(it, 2);
 	for(auto& it : list_1)
 	{
 		std::cout << it << std::endl;
 	}
 	std::cout << std::endl << std::endl;
 
-    // Метод pop_front() удаляет элемент из начала списка
+	// Метод pop_front() удаляет элемент из начала списка
 	std::cout << "Method pop_front()" << std::endl;
-    list_1.pop_front();
+	list_1.pop_front();
 	for(auto& it : list_1)
 	{
 		std::cout << it << std::endl;
 	}
 	std::cout << std::endl << std::endl;
 
-    // Метод pop_back() удаляет элемент из конца списка
+	// Метод pop_back() удаляет элемент из конца списка
 	std::cout << "Method pop_back()" << std::endl;
-    list_1.pop_back();
+	list_1.pop_back();
 	for(auto& it : list_1)
 	{
 		std::cout << it << std::endl;
 	}
 	std::cout << std::endl << std::endl;
 
-    // Метод erase() удаляет элемент на который указывает итератор pos().
+	// Метод erase() удаляет элемент на который указывает итератор pos().
 	std::cout << "Method erase()" << std::endl;
-    it = std::next(list_1.begin(), 1);
-    list_1.erase(it);
+	it = std::next(list_1.begin(), 1);
+	list_1.erase(it);
 	for(auto& it : list_1)
 	{
 		std::cout << it << std::endl;
 	}
 	std::cout << std::endl << std::endl;
 
-    // Доступ к элементу по индексу
+	// Доступ к элементу по индексу
 	std::cout << "Accessing an element by index" << std::endl;
-    it = std::next(list_1.begin(), 1);
-    int value = *it;
+	it = std::next(list_1.begin(), 1);
+	int value = *it;
 	std::cout << value << std::endl;
 
-    // Поиск элемента по значению
+	// Поиск элемента по значению
 	std::cout << "Search" << std::endl;
-    it = std::find(list_1.begin(), list_1.end(), 3);
-    if (it != list_1.end()) { // если поиск не был завершен удачно, то функция std::find() вернет итерратор указывающий на позицию после последнего элемента - end()
-        std::cout << "Элемент найден: " << *it << std::endl;
-    } else {
-        std::cout << "Элемент не найден" << std::endl;
-    }
+	it = std::find(list_1.begin(), list_1.end(), 3);
+	if (it != list_1.end())
+	{ // если поиск не был завершен удачно, то функция std::find() вернет итерратор указывающий на позицию после последнего элемента - end()
+		std::cout << "Элемент найден: " << *it << std::endl;
+	}
+	else
+	{
+		std::cout << "Элемент не найден" << std::endl;
+	}
 
 	// Метод at() и опертор [] не определены, т.к. это противоречит логике контейнера.
 
@@ -104,12 +108,33 @@ int main()
 	list_1.push_front(3);
 	list_1.push_front(15);
 
-    list_1.sort();
+	list_1.sort();
 
-    // Вывод отсортированного списка
-    for (const auto& el : list_1) {
-        std::cout << el << " ";
-    }
+	// Вывод отсортированного списка
+	for (const auto& el : list_1)
+	{
+		std::cout << el << " ";
+	}
+
+	// Итераторы. Двунаправленный список
+	// Итераторы списка являются двунаправленными итераторами - тип итераторов, который
+	// поддерживает инкремент, декремент, сравнение через == и !=, но не поддерживает >/<, смещение на n и индексацию
+	// У списка есть 4 типа итерраторов: обычный, реверсный, константный обычный, константный реверсный
+
+	// Добавление, удаление и перемещение элементов внутри списка или между несколькими списками не делает итераторы
+	// или ссылки недействительными. Итератор становится недействительным только при удалении соответствующего элемента.
+
+	// Итераторы. Однонаправленный список
+	// Итераторы forward_list являются однонаправленными итераторами - тип итераторов, который
+	// поддерживает инкремент, сравнение через == и !=, но не поддерживает декремент, >/<, смещение на n и индексацию
+	// У списка есть 2(3) типа итерраторов: обычный, константный обычный и before_begin, cbefore_begin(используется
+	// только в функции insert_after() , emplace_after() , erasure_after() , splice_after())
+
+	std::forward_list<int> forwardList;
+	auto iterator = forwardList.before_begin(); // Его можно получить как любой другой итератор
+
+	// Добавление, удаление и перемещение элементов внутри списка или между несколькими списками не делает итераторы
+	// или ссылки недействительными. Итератор становится недействительным только при удалении соответствующего элемента.
 
 	return 0;
 }

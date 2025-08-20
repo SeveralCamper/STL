@@ -71,7 +71,11 @@ int main()
 	std::cout << *(p + 4) << std::endl; // выводим последний элемент массива
 	std::cout << std::endl;
 
-	// std::array поддерживает итерриование и методы: begin(), end(), cbegin(), cend(), rbegin(), rend()
+	// Итераторы
+	// Итераторы массива являются итераторами произвольного доступа - тип итераторов, который
+	// поддерживает большинство операций и всю арифметику (инкремент, декремент, свдиг на n, все типы сравнения).
+
+	// std::array поддерживает итерриование и методы: begin(), end(), cbegin(), cend(), rbegin(), rend(), crbegin(), crend()
 	// Метод swap() обменивает содержимое двух массивов одного типа и размера.
 	std::cout << "Method swap()" << std::endl;
 	std::array<int, 5> array_3 = {1, 2, 3, 4, 5};
@@ -90,24 +94,30 @@ int main()
 	}
 	std::cout << std::endl;
 
-    int value_to_find = 3;
+	int value_to_find = 3;
 
 	// С помощью метода std::find можно найти элемент в std::array за линейное время
-    auto it = std::find(array_1.begin(), array_1.end(), value_to_find);
-    if (it != array_1.end()) {
-        std::cout << "Element found at index: " << std::distance(array_1.begin(), it) << std::endl;
-    } else {
-        std::cout << "Element not found" << std::endl;
-    }
+	auto it = std::find(array_1.begin(), array_1.end(), value_to_find);
+	if (it != array_1.end())
+	{
+		std::cout << "Element found at index: " << std::distance(array_1.begin(), it) << std::endl;
+	}
+	else
+	{
+		std::cout << "Element not found" << std::endl;
+	}
 
-    // С помощью std::binary_search - за логорифмическое. Бинарный поиск требует отсортированного массива
-    bool found = std::binary_search(array_1.begin(), array_1.end(), value_to_find);
+	// С помощью std::binary_search - за логорифмическое. Бинарный поиск требует отсортированного массива
+	bool found = std::binary_search(array_1.begin(), array_1.end(), value_to_find);
 
-    if (found) {
-        std::cout << "Element found" << std::endl;
-    } else {
-        std::cout << "Element not found" << std::endl;
-    }
+	if (found)
+	{
+		std::cout << "Element found" << std::endl;
+	}
+	else
+	{
+		std::cout << "Element not found" << std::endl;
+	}
 
 	return 0;
 }

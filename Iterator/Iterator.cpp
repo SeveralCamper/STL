@@ -1,7 +1,9 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <map>
 #include <list>
+#include <deque>
 #include <array>
 #include <vector>
 #include <limits>
@@ -32,7 +34,7 @@ int main()
 	}
 	std::cout << std::endl << std::endl;
 	// Более локоничный вариант прохождения по контейниру с использованием итератора:
-	for (auto& it : array_1)
+	for (auto& it : array_1) // ranged-based проход по контейнеру
 	{
 		std::cout << it << " ";
 	}
@@ -44,7 +46,7 @@ int main()
 	}
 	std::cout << std::endl << std::endl;
 
-	// К итераторам можно применять следующие операции:
+	// К итераторам std::array можно применять следующие операции:
 	// *iter - получение элемента, на который указывает контейнер.
 	// ++iter: перемещение итератора вперед для обращения к следующему элементу
 	// --iter: перемещение итератора назад для обращения к предыдущему элементу. Итераторы контейнера forward_list не поддерживают операцию декремента.
@@ -102,7 +104,7 @@ int main()
 	*forward_list_1_iter_begin = 6; // этот код отработает корректно
 	// *forward_list_1_iter_end = 7; // данная же запись приведет к ошибке сегментирования памяти, т.к. методы end() у всех контейнеров возвращают не
 	// указатель на последний элемент, а указатель на элемент следующий за последним. Это так называемая "позиция за концом" или "за пределами конца" списка.
-	//  end() не может быть использован для доступа к содержимому списка напрямую, также как и у любого другого контейнера.
+	// end() не может быть использован для доступа к содержимому списка напрямую, также как и у любого другого контейнера.
 	for (auto& it : forward_list_1)
 	{
 		std::cout << it << " ";
@@ -114,19 +116,58 @@ int main()
 	std::vector<double>::iterator vector_1_iter_end = vector_1.end();
 	std::cout << "Vector iters:" << std::endl;
 
-	// Для вектора эту запись можно обыграть подругому, т.к. iterator для контейнера std::vector поддерживает декремент:
-	*(--vector_1_iter_end) = 10;
+	// Для вектора эту запись можно обыграть по-другому, т.к. iterator для контейнера std::vector поддерживает декремент:
+	*(--vector_1_iter_end) = 10; // декремент от end(), разыминование, запись 10
 	std::cout << vector_1[4] << std::endl;
 	std::cout << std::endl;
 
-	// При добавлении или удалении элементов контейнера следует учитывать тот момент, что все текущие итераторы,
-	// ссылки и указатели на его элементы станут недоступными. Когда вы добавляете или удаляете элементы из контейнера, это может привести к изменению
-	// расположения элементов в памяти и даже к перераспределению всего внутреннего представления контейнера. В результате старые итераторы могут стать
-	// недействительными, потому что они могут указывать на элементы, которые уже не существуют в новом внутреннем представлении контейнера.
+	// Инвалидация.
+	// Некоторые итераторты, в связи с внутренней реализацией контейнеров, могут инвалидироваться, в случае добалвения или удаления элементов.
+	// Виной тому динамические перевыделния памяти. Так, если vector решил реаллоцировать свою память, итераторы, которые были сохранены до
+	// этого инвалидирутся.
 
-    auto it = vector_1.begin() + 1;
-    vector_1.push_back(6);
-    // std::cout << *it << std::endl; // При попытке доступа к элементу через сохраненный итерратор, мы можем вызвать недопустимый доступ или непредсказуемое поведение
+	std::cout << "Vector invalidation:" << std::endl;
+	std::cout << "Vector size: " << vector_1.size() << std::endl;
+	std::cout << "Vector capacity: " << vector_1.capacity() << std::endl;
+	// на данный момент размер вектора = capacity -> при добавлении нового элемента память перевыделится и iterator инвалидируется
+	auto itVector_1 = vector_1.begin() + 1;
+	std::cout << "Correct iterator: " << *itVector_1 << std::endl;
+	vector_1.push_back(6);
+	std::cout << "Change container structure" << std::endl;
+	std::cout << "Vector size: " << vector_1.size() << std::endl;
+	std::cout << "Vector capacity: " << vector_1.capacity() << std::endl;
+	std::cout << "Invalid iterator: " << *itVector_1 << std::endl;
+	std::cout << std::endl;
+
+	// Deque. Вставка и удаление элементов в любом из её концов никогда не инвалидирует ссылки на остальные элементы
+	// При вставке/удалении в середине (insert, erase) - инвалидируются все итераторы, указатели и ссылки, после позиции вставки, удаления
+
+	std::cout << "Deque invalidation:" << std::endl;
+	std::deque<double> deque_1 {1.0, 2.0, 3.0, 4.0, 5.0};
+	auto itDeque_1 = deque_1.begin() + 2;
+	auto it2Deque_1 = deque_1.begin() + 4;
+	std::cout << "Correct iterator: " << *itDeque_1 << std::endl;
+	std::cout << "Correct iterator: " << *it2Deque_1 << std::endl;
+	deque_1.insert(deque_1.begin() + 4, 6.0);
+	std::cout << "Change container structure" << std::endl;
+	std::cout << "Correct iterator: " << *itDeque_1 << std::endl;
+	std::cout << "Invalid iterator: " << *it2Deque_1 << ". It might be 5" << std::endl;
+	std::cout << std::endl;
+
+	// list, map, set, unordered_* — итераторы НЕ инвалидируются при добавлении новых элементов.
+	// Они инвалидируются только при удалении самого элемента, на который указывают.
+
+	std::map<int, std::string> map_1 {{1.0, "a"}, {2.0, "b"}, {3.0, "c"}, {4.0, "d"}, {5.0, "e"}};
+	auto itMap_1 = map_1.find(1);
+	auto it2Map_1 = map_1.find(3);
+	std::cout << "Correct iterator: " << itMap_1->second << std::endl;
+	std::cout << "Correct iterator: " << it2Map_1->second << std::endl;
+	map_1.insert(map_1.find(2), {6.0, "f"});
+	std::cout << "Container structure not changed" << std::endl;
+	std::cout << "Correct iterator: " << itMap_1->second << std::endl;
+	std::cout << "Correct iterator: " << it2Map_1->second << std::endl;
+	std::cout << std::endl;
+
 
 	// Если контейнер пресдавтялет константу, то обращться к его элементам можно только с помощью константного итератора (тип const_iterator).
 	// Такой итератор позволяет считывать элементы, но не изменять их:
@@ -153,45 +194,59 @@ int main()
 	// Реверсивные итераторы позволяют перебирать элементы контейнера в обратном направлении.
 	// Для получения реверсивного итератора применяются функции rbegin() и rend(), а сам итератор представляет тип reverse_iterator:
 
-    for (auto iter { vector_2.rbegin() }; iter != vector_2.rend(); ++iter) // код отрабатывает, т.к. реверсивный указатель создался автоматически
-    {																	 // с квалификатором const
-        std::cout << *iter << " ";
-		// *iter += 2; // все еще не допустимое действие
-    }
-    std::cout << std::endl << std::endl;
+	std::cout << "Reversed vector" << std::endl;
+	for (auto iter = vector_2.rbegin(); iter != vector_2.rend(); iter += 2)
+	{
+		std::cout << *iter << " ";
+	}
+	std::cout << std::endl << std::endl;
 
-	// Итераторы можно использовать и на обычных массивах:
+	std::cout << "Reversed vector with std::advance" << std::endl;
+	for (auto iter = vector_2.rbegin(); iter != vector_2.rend();)
+	{
+		std::cout << *iter << " ";
+		// *iter += 2; // все еще не допустимое действие, т.к. вектор const
+		std::advance(iter, 2);
+		if (iter >= vector_2.rend())
+		{
+			break;
+		}
+	}
+	std::cout << std::endl << std::endl;
+
+	// Итераторы можно использовать и на обычных С-массивах:
 	int data[]{4, 5, 6, 7, 8};
 	auto iter = std::begin(data);
 	auto end = std::end(data);
 	std::cout << "Default array iters:" << std::endl;
 
 	for (auto it { iter }; it != end; it++)
-    {
-        std::cout << *it << " ";
-    }
+	{
+		std::cout << *it << " ";
+	}
 	std::cout << std::endl << std::endl;
 
 
 	// Теперь стоит поговорить о типах итерраторов, которые я описал в самом начале:
 	// Итераторы ввода (input iterators)
 
-	// Ввод. Входной итераторX может выполнять итерацию по последовательности с помощью ++ оператора и читать элемент в любое количество раз
+	// Ввод. Входной итератор может выполнять итерирование по последовательности с помощью ++ оператора и читать элемент
 	// с помощью * оператора. Вы можете сравнить входные итераторы с помощью == операторов и != операторов. После увеличения любой копии входного
 	// итератора ни одна из других копий не может быть безопасно сравниваема, разыменовывается или увеличивается после этого.
 
 	// Используем итератор ввода, например, для чтения значений из std::cin:
 
 	std::cout << "Input iterators" << std::endl;
-    std::cout << "Enter integers separated by spaces (enter any non-numeric character to complete): ";
-    std::istream_iterator<int> input_begin(std::cin);
-    std::istream_iterator<int> input_end;
+	std::cout << "Enter integers separated by spaces (enter any non-numeric character to complete): ";
+	std::istream_iterator<int> input_begin(std::cin);
+	std::istream_iterator<int> input_end;
 
-    std::cout << "Numbers you entered: ";
-    while (input_begin != input_end) {
-        std::cout << *input_begin++ << " ";
-    }
-    std::cout << std::endl << std::endl;
+	std::cout << "Numbers you entered: ";
+	while (input_begin != input_end)
+	{
+		std::cout << *input_begin++ << " ";
+	}
+	std::cout << std::endl << std::endl;
 
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
@@ -203,12 +258,12 @@ int main()
 	// С помощью итератора вывода выведем наш массив в std::cout:
 
 	std::cout << "Output iterators" << std::endl;
-    std::ostream_iterator<int> output_iterator(std::cout, " ");
+	std::ostream_iterator<int> output_iterator(std::cout, " ");
 	for (auto it { iter }; it != end; it++)
-    {
-        *output_iterator++ = *it;
-    }
-    std::cout << std::endl << std::endl;
+	{
+		*output_iterator++ = *it;
+	}
+	std::cout << std::endl << std::endl;
 
 	// Однонаправленные итераторы (forward iterators)
 
@@ -218,21 +273,23 @@ int main()
 
 	std::cout << "Forward iterators" << std::endl;
 
-    std::cout << "Original list: ";
-    for (auto& val : forward_list_1) {
-        std::cout << val << " ";
-    }
-    std::cout << std::endl << std::endl;
+	std::cout << "Original list: ";
+	for (auto& val : forward_list_1)
+	{
+		std::cout << val << " ";
+	}
+	std::cout << std::endl << std::endl;
 
-    for (auto it = forward_list_1_iter_begin; it != forward_list_1_iter_end; ++it) {
-        *it += 10;
-    }
+	for (auto it = forward_list_1_iter_begin; it != forward_list_1_iter_end; ++it) {
+		*it += 10;
+	}
 
-    std::cout << "Changed list: ";
-    for (auto& val : forward_list_1) {
-        std::cout << val << " ";
-    }
-    std::cout << std::endl << std::endl;
+	std::cout << "Changed list: ";
+	for (auto& val : forward_list_1)
+	{
+		std::cout << val << " ";
+	}
+	std::cout << std::endl << std::endl;
 
 	// Фактически обычный вызов итерартора.
 
@@ -244,27 +301,30 @@ int main()
 
 	std::cout << "Bidirectional iterators" << std::endl;
 
-    std::list<int> list_1 = {1, 2, 3, 4, 5};
+	std::list<int> list_1 = {1, 2, 3, 4, 5};
 
-    std::cout << "Original list: ";
-    for (auto& val : list_1) {
-        std::cout << val << " ";
-    }
-    std::cout << std::endl << std::endl;
+	std::cout << "Original list: ";
+	for (auto& val : list_1)
+	{
+		std::cout << val << " ";
+	}
+	std::cout << std::endl << std::endl;
 
-    // Уменьшим каждый элемент на 1, начиная с конца списка
-    auto it_list = --list_1.end(); // Перемещаем итератор на последний элемент
-    while (it_list != list_1.begin()) {
-        *it_list -= 1;
-        --it_list;
-    }
-    *it_list -= 1; // Уменьшаем значение первого элемента
+	// Уменьшим каждый элемент на 1, начиная с конца списка
+	auto it_list = --list_1.end(); // Перемещаем итератор на последний элемент
+	while (it_list != list_1.begin())
+	{
+		*it_list -= 1;
+		--it_list;
+	}
+	*it_list -= 1; // Уменьшаем значение первого элемента
 
-    std::cout << "Changed list: ";
-    for (auto& val : list_1) {
-        std::cout << val << " ";
-    }
-    std::cout << std::endl << std::endl;	
+	std::cout << "Changed list: ";
+	for (auto& val : list_1)
+	{
+		std::cout << val << " ";
+	}
+	std::cout << std::endl << std::endl;	
 
 	// Итераторы произвольного доступа (random access iterators)
 
@@ -275,21 +335,24 @@ int main()
 
 	std::cout << "Random access iterators" << std::endl;
 
-    std::cout << "Original vector: ";
-    for (auto& val : vector_1) {
-        std::cout << val << " ";
-    }
-    std::cout << std::endl << std::endl;
+	std::cout << "Original vector: ";
+	for (auto& val : vector_1)
+	{
+		std::cout << val << " ";
+	}
+	std::cout << std::endl << std::endl;
 
-    auto it_vector = vector_1.begin() + 2; // свободно проходим на n по итератору
-    for (; it_vector != vector_1.end(); ++it_vector) {
-        *it_vector += 100;
-    }
+	auto it_vector = vector_1.begin() + 2; // свободно проходим на n по итератору
+	for (; it_vector != vector_1.end(); ++it_vector)
+	{
+		*it_vector += 100;
+	}
 
-    std::cout << "Changed vector: ";
-    for (auto& val : vector_1) {
-        std::cout << val << " ";
-    }
+	std::cout << "Changed vector: ";
+	for (auto& val : vector_1)
+	{
+		std::cout << val << " ";
+	}
 	std::cout << std::endl;
 
 	return 0;

@@ -4,7 +4,9 @@
 
 // std::vector - это шаблонный класс, предоставляемый стандартной библиотекой C++, который представляет собой динамический массив.
 // Он является частью STL (Standard Template Library) и поддерживает автоматическое управление памятью, изменение размера, доступ по индексу и многое другое.
-// Самые важные характеристики: динамическое изменение размера при добавлении, удалении. Последовательное хранение элементов - располагается непрерывно в памтя.
+// Самые важные характеристики: динамическое изменение размера при добавлении, удалении.
+// Последовательное хранение элементов - располагается непрерывно в памтя -> по контейнеру можно итерироваться не тольско с помощью итераторов, но и с помощью
+// смещения указателя на размер элемента массива (за исключением std::vector<bool> - единственная специализация std::vector)
 // Управление памятью происходит автоматически
 
 // Вставка в начало: O(n), т.к. требует сдвига массива вправо (перевыделения памяти)
@@ -18,6 +20,7 @@
 // Удаление из любого места: O(n) - требует сдвига элементов влево
 
 // Получить любой элемент: O(1);
+
 // Поиск: O(n). - линейный поиск.
 
 int main()
@@ -27,7 +30,7 @@ int main()
 	std::cout << "Method insert()" << std::endl;
 	vector_1.insert(vector_1.begin(), 1); // добавлет в начало вектора значение 1
 	vector_1.insert(vector_1.begin() + 1, 1); // добавляет во второе значение вектора 1
-	vector_1.insert(vector_1.begin(), 3); // добавляет во второе значение вектора 1
+	vector_1.insert(vector_1.begin(), 3); // добавляет в начало значение вектора 3
 	
 	for (auto& el : vector_1)
 	{
@@ -63,7 +66,8 @@ int main()
 	}
 	std::cout << std::endl << std::endl;
 
-	// Метод push_front() и pop_front() для вектора не раелизованы  из-за невыгодной асимтотической сложности данного действия O(n). Так нам намекают, что лучше все добавлять в конец
+	// Метод push_front() и pop_front() для вектора не раелизованы  из-за невыгодной асимтотической сложности данного действия O(n).
+	// Так нам намекают, что лучше все добавлять в конец
 
 	// Поддерживает все те же методы, что и array() их описывать не имеет смысла.
 	// Поддерживает begin(), end(), cbegin(), cend(), rbegin(), rend().
@@ -95,7 +99,7 @@ int main()
 	}
 	std::cout << std::endl << std::endl;
 
-    int value_to_find = 3;
+	int value_to_find = 3;
 
 	for (int i = 0; i < 5; i++)
 	{
@@ -109,22 +113,81 @@ int main()
 	}
 	std::cout << std::endl;
 
-	// С помощью метода std::find можно найти элемент в std::array за линейное время
-    auto it = std::find(vector_1.begin(), vector_1.end(), value_to_find);
-    if (it != vector_1.end()) {
-        std::cout << "Element found at index: " << std::distance(vector_1.begin(), it) << std::endl;
-    } else {
-        std::cout << "Element not found" << std::endl;
-    }
+	// С помощью метода std::find можно найти элемент в std::vector за линейное время
+	auto it = std::find(vector_1.begin(), vector_1.end(), value_to_find);
+	if (it != vector_1.end())
+	{
+		std::cout << "Element found at index: " << std::distance(vector_1.begin(), it) << std::endl;
+	}
+	else
+	{
+		std::cout << "Element not found" << std::endl;
+	}
 
-    // С помощью std::binary_search - за логорифмическое. Бинарный поиск требует отсортированного массива
-    bool found = std::binary_search(vector_1.begin(), vector_1.end(), value_to_find);
+	// С помощью std::binary_search - за логорифмическое. Бинарный поиск требует отсортированного массива
+	bool found = std::binary_search(vector_1.begin(), vector_1.end(), value_to_find);
 
-    if (found) {
-        std::cout << "Element found" << std::endl;
-    } else {
-        std::cout << "Element not found" << std::endl;
-    }
+	if (found)
+	{
+		std::cout << "Element found" << std::endl;
+	}
+	else
+	{
+		std::cout << "Element not found" << std::endl;
+	}
+	std::cout << std::endl;
+
+	// Итераторы
+	// Итераторы вектора являются итераторами произвольного доступа - тип итераторов, который
+	// поддерживает большинство операций и всю арифметику (инкремент, декремент, свдиг на n, все типы сравнения).
+	// У вектора есть 4 типа итерраторов: обычный, реверсный, константный обычный, константный реверсный
+
+	std::cout << "Vector iterators" << std::endl;
+	auto iterVec = vector_1.begin(); // обычный итератор вектора. Позволяет изменять и считывать данные. Перемещаться по конетйнеру в любую сторону
+	auto constIterVec = vector_1.cbegin(); // константный итератор вектора. Не позволяет изменять объект и позволяет работать с const объектами
+	auto revIterVec = vector_1.rbegin(); // реверсивный итератор вектора. Возвращает реверсивное начало = конец
+	auto constRevIterVec = vector_1.crbegin(); // константный реверсивный итератор вектора. Возвращает реверсивное начало = конец
+
+	auto iterVecEnd = vector_1.end(); // обычный конец вектора.
+	auto constIterVecEnd = vector_1.cend(); // константный конец вектора.
+	auto revIterVecEnd = vector_1.rend(); // реверсивный конец вектора. Возвращает реверсивный конец = начало
+	auto constRevIterVecEnd = vector_1.crend(); // константный реверсивный конец вектора. Возвращает реверсивный конец = начало
+
+	// Т.к. у нас иетратор свободного досутпа, мы можем декрементироваться от begin() или инрементироваться от end() и получить UB. Но нам это не нужно
+
+	// 1. Классический обход с помощью итераторов
+	std::cout << "Forward iteration:" << std::endl;
+	for (auto it = iterVec; it != iterVecEnd; ++it)
+	{
+		std::cout << *it << " "; // Разымменовываем итератор для получения значения
+	}
+	std::cout << std::endl << std::endl;
+
+	// 2. Использование константных итераторов (если не планируется менять данные)
+	std::cout << "Const iteration:" << std::endl;
+	for (auto cit = constIterVec; cit != constIterVecEnd; ++cit)
+	{
+		// *cit = 100; // Ошибка компиляции: cit является const_iterator
+		std::cout << *cit << " ";
+	}
+	std::cout << std::endl << std::endl;
+
+	// 3. Обратный обход с помощью реверсных итераторов
+	std::cout << "Reverse iteration:" << std::endl;
+	for (auto rit = revIterVec; rit != revIterVecEnd; ++rit)
+	{
+		std::cout << *rit << " "; // Будет: 4 3 2 1 0
+	}
+	std::cout << std::endl << std::endl;
+
+	// 4. Обратный обход с помощью константных реверсных итераторов
+	std::cout << "Reverse iteration:" << std::endl;
+	for (auto crit = constRevIterVec; crit != constRevIterVecEnd; ++crit)
+	{
+		// *crit = 100; // Ошибка компиляции: cit является const_iterator
+		std::cout << *crit << " "; // Будет: 4 3 2 1 0
+	}
+	std::cout << std::endl;
 
 	return 0;
 }
