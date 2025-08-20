@@ -236,6 +236,8 @@ int main()
 
 	// Используем итератор ввода, например, для чтения значений из std::cin:
 
+	// Прочитав и инкрементировав итератор, назад уже не получится вернуться.
+
 	std::cout << "Input iterators" << std::endl;
 	std::cout << "Enter integers separated by spaces (enter any non-numeric character to complete): ";
 	std::istream_iterator<int> input_begin(std::cin);
@@ -248,11 +250,24 @@ int main()
 	}
 	std::cout << std::endl << std::endl;
 
+	// Можно инициализировать вектор считанными данными из потока
+	std::vector<int> numbers(input_begin, input_end); // инициализация вектора считанными числами
+
+	std::cout << "Vector inited by thread:" << std::endl;
+	for (int n : numbers)
+	{
+		std::cout << n << " ";
+	}
+	std::cout << std::endl << std::endl;
+
+	// Теперь input_begin невалиден
+	// std::cout << "Invalid iterator: " << *input_begin << std::endl;
+
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
 	// Итераторы вывода (output iterators)
 
-	// Вывод. Выходной итераторX может выполнять итерацию по последовательности с помощью ++ оператора и может записывать элемент только
+	// Вывод. Выходной итератор может выполнять итерацию по последовательности с помощью ++ оператора и может записывать элемент только
 	// один раз с помощью * оператора. 
 
 	// С помощью итератора вывода выведем наш массив в std::cout:
